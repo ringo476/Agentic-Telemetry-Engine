@@ -1,0 +1,14 @@
+# Ignore the virtual environment dependencies
+venv/
+env/
+
+# Ignore local configuration and secrets
+.env
+
+# Ignore Python runtime cache directories
+__pycache__/
+*.pyc
+
+# Ignore Chainlit local file history
+.chainlit/
+.files/

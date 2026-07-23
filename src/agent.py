@@ -1,4 +1,6 @@
 import os
+import asyncio
+import nest_asyncio
 from typing import Annotated, TypedDict
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage
@@ -8,19 +10,21 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
+nest_asyncio.apply()
 os.environ["OPENAI_API_KEY"] = "sk-your-real-api-key-here"
 
 class AgentState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
 
 llm = ChatOpenAI(model="gpt-4o-mini")
-mcp_client = MultiServerMCPClient()
-mcp_client.connect_to_stdio_server(
-    server_name="VectorDB_Server",
-    command="python",
-    args=["db_mcp.py"]
-)
-tools = mcp_client.get_tools()
+mcp_client = MultiServerMCPClient({
+    "VectorDB_Server": {
+        "command": "python",
+        "args": ["mcp_db.py"],
+        "transport": "stdio"
+    }
+})
+tools = asyncio.run(mcp_client.get_tools())
 llm_with_tools = llm.bind_tools(tools)
 
 # FIXED: Made the thinker node fully asynchronous

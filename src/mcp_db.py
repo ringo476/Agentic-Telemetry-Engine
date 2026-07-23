@@ -2,6 +2,8 @@ from mcp.server.fastmcp import FastMCP
 import sqlalchemy
 import json
 from langchain_huggingface import HuggingFaceEmbeddings
+import os
+from dotenv import load_dotenv
 
 # ==========================================
 # 1. INITIALIZE SERVER & DATABASE
@@ -13,7 +15,12 @@ embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-Mi
 
 # The connection string. Format: postgresql://user:password@host:port/database_name
 # 'postgres' is the default database created upon installation.
-DB_URL = "postgresql://postgres:secret@localhost:5432/postgres"
+
+load_dotenv()
+DB_URL=os.getenv("DATABASE_URL")
+if not DB_URL:
+    raise ValueError("FATAL ERROR: DATABASE_URL is missing from the .env file.")
+
 engine = sqlalchemy.create_engine(DB_URL)
 
 # ==========================================

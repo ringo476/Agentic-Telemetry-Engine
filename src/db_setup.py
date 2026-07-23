@@ -1,11 +1,16 @@
 import sqlalchemy
 import json
 from langchain_huggingface import HuggingFaceEmbeddings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DB_URL = os.getenv("DATABASE_URL")
 
 print("Loading HuggingFace model into RAM...")
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-DB_URL = "postgresql://postgres:secret@localhost:5432/postgres"
 engine = sqlalchemy.create_engine(DB_URL)
 
 setup_sql="""
@@ -13,11 +18,11 @@ setup_sql="""
 CREATE EXTENSION IF NOT EXISTS vector;
 
 DROP TABLE IF EXISTS node_telemetry_metrics;
-DROP TABLE IF EXISTS active_tcp_session;
+DROP TABLE IF EXISTS active_tcp_sessions;
 DROP TABLE IF EXISTS system_error_logs;
 -- 2. The Hardware Health Table
 CREATE TABLE node_telemetry_metrics(
-    timestamp TIMESTAP DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     node_id VARCHAR(50),
     rx_pps INTEGER,
     tx_pps INTEGER,
